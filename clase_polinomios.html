@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polinomios: ceros, gráficas y división. Clase interactiva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#120f2a; --panel:rgba(34,29,77,.74); --line:#3a3470; --text:#ece9ff; --muted:#a8a3d1;
+  --violet:#9d7bff; --blue:#4ea8ff; --green:#36d89a; --red:#ff6b81; --amber:#ffc857;
+  --head:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:17px;scroll-padding-top:calc(110px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
+html.big{font-size:21px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;font-family:var(--body);font-size:1rem;line-height:1.55;color:var(--text);background:var(--bg);
+  background-image:radial-gradient(1100px 600px at 8% -12%,rgba(157,123,255,.28),transparent 60%),
+  radial-gradient(900px 520px at 100% 0%,rgba(78,168,255,.18),transparent 60%),
+  radial-gradient(900px 700px at 50% 115%,rgba(54,216,154,.13),transparent 60%);background-attachment:fixed}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* Barra superior */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(18,15,42,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 18px 8px}
+.topbar .row{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;max-width:1120px;margin:0 auto}
+.brand{font-family:var(--head);font-weight:700;font-size:1.02rem;margin-right:auto}
+.clock{font-family:var(--head);font-weight:800;font-size:1.35rem;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.clock small{font-size:.8rem;color:var(--muted);font-weight:500}
+.nowblock{font-size:.85rem;color:var(--muted);max-width:260px}
+.nowblock b{color:var(--text)}
+.progress{height:6px;background:#29245a;border-radius:6px;overflow:hidden;max-width:1120px;margin:8px auto 0}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--blue),var(--green));transition:width .5s}
+.proglabel{max-width:1120px;margin:3px auto 0;font-size:.75rem;color:var(--muted);text-align:right}
+
+main{max-width:1120px;margin:0 auto;padding:0 18px 40px}
+
+/* Portada */
+.hero{position:relative;margin:26px 0 20px;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:#16123a}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,15,42,.96) 0%,rgba(18,15,42,.82) 42%,rgba(18,15,42,.1) 78%);pointer-events:none}
+.hero .copy{position:relative;z-index:1;padding:44px 36px 26px;max-width:620px}
+.hero h1{font-family:var(--head);font-weight:800;font-size:clamp(2.2rem,5.4vw,3.8rem);line-height:.98;letter-spacing:-.025em;margin:0 0 14px}
+.hero p{margin:0 0 8px;color:#d6d1f5;max-width:52ch}
+.hero .credit{color:var(--muted);font-size:.9rem;margin-top:14px}
+.tapewrap{position:relative;z-index:1;padding:0 24px 26px;overflow-x:auto}
+.tape{position:relative;display:flex;min-width:820px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(20,16,52,.92)}
+.seg{flex-basis:0;min-width:0;padding:9px 7px;font:inherit;font-size:.72rem;line-height:1.25;color:var(--muted);text-align:left;background:none;border:0;border-right:1px solid rgba(255,255,255,.07);cursor:pointer}
+.seg:last-child{border-right:0}
+.seg b{display:block;font-family:var(--head);font-size:.82rem;color:var(--text);margin-bottom:2px}
+.seg:hover{background:rgba(157,123,255,.12)}
+.seg.done{background:rgba(54,216,154,.09)}
+.seg.now{background:rgba(157,123,255,.3);color:var(--text)}
+.seg.break b{color:var(--amber)}
+.playhead{position:absolute;top:0;bottom:0;width:3px;left:0;background:var(--amber);box-shadow:0 0 14px var(--amber);pointer-events:none;transition:left .5s linear}
+
+/* Bloques */
+details.block{background:var(--panel);border:1px solid var(--line);border-radius:18px;margin:14px 0}
+details.block[open]{border-color:#5a4fb0}
+details.block>summary{list-style:none;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 18px;cursor:pointer;border-radius:18px}
+details.block>summary::-webkit-details-marker{display:none}
+.num{font-family:var(--head);font-weight:800;font-size:1.3rem;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff}
+.break .num{background:linear-gradient(135deg,var(--amber),#ff9f6b);color:#2a1a00}
+.reto .num{background:linear-gradient(135deg,var(--green),var(--blue))}
+.stitle{font-family:var(--head);font-weight:700;font-size:1.18rem;line-height:1.2}
+.smeta{font-size:.85rem;color:var(--muted);margin-top:2px}
+.pill{font-size:.8rem;padding:4px 11px;border-radius:99px;border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pill.full{border-color:var(--green);color:var(--green)}
+.bbody{padding:2px 20px 22px}
+h3{font-family:var(--head);font-weight:700;font-size:1.06rem;margin:22px 0 8px;color:#dcd5ff}
+.concept{border-left:3px solid var(--violet);padding:8px 16px;margin:6px 0 14px;background:rgba(157,123,255,.07);border-radius:0 12px 12px 0}
+.concept p{margin:.45em 0}
+.tip{border-left-color:var(--amber);background:rgba(255,200,87,.07)}
+table.forms{border-collapse:collapse;margin:8px 0;width:100%;max-width:640px}
+table.forms td,table.forms th{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:middle}
+table.forms th{color:var(--muted);font-weight:700;font-size:.88rem}
+.scroll{overflow-x:auto}
+
+.worked{border:1px dashed #5a4fb0;border-radius:14px;padding:12px 16px;margin:14px 0;background:rgba(18,15,42,.45)}
+.worked .enun{margin:.2em 0 .6em}
+.worked .step{padding:5px 0 5px 14px;border-left:3px solid var(--green);margin:8px 0}
+.wk-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.wk-acts .count{font-size:.85rem;color:var(--muted)}
+
+.btn{font:inherit;font-weight:700;font-size:.92rem;border:0;border-radius:10px;padding:8px 14px;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--violet),var(--blue))}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.small{padding:5px 10px;font-size:.82rem}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:not(:disabled):hover{filter:brightness(1.12)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 6px}
+.toolbar h3{margin:0;margin-right:auto}
+
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,430px),1fr));gap:12px}
+.item{border:1px solid var(--line);border-radius:14px;padding:12px 16px;background:rgba(18,15,42,.55);transition:border-color .3s}
+.item.solved{border-color:rgba(54,216,154,.7)}
+.item p{margin:.35em 0}
+.item .tag{font-size:.78rem;color:var(--muted)}
+.fields{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:10px 0}
+.fld{display:inline-flex;gap:7px;align-items:center}
+.ans{font:inherit;background:#0e0b25;color:var(--text);border:1.5px solid var(--line);border-radius:9px;padding:6px 9px;transition:border-color .2s,background .2s}
+input.ans{width:92px}
+.ans.ok{border-color:var(--green);background:rgba(54,216,154,.13)}
+.ans.bad{border-color:var(--red);background:rgba(255,107,129,.13)}
+.ans:disabled{opacity:1}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.opt{font:inherit;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:#1a1644;color:var(--text);cursor:pointer;text-align:left;transition:border-color .2s,background .2s}
+.opt:hover:not(:disabled){border-color:var(--violet)}
+.opt.ok{border-color:var(--green);background:rgba(54,216,154,.16)}
+.opt.bad{border-color:var(--red);background:rgba(255,107,129,.16)}
+.opt:disabled{cursor:default}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.fb{min-height:1.35em;font-weight:700;margin-top:8px;font-size:.93rem}
+.fb.ok{color:var(--green)} .fb.bad{color:var(--red)} .fb.warn{color:var(--amber)}
+.sol{margin-top:10px;padding:10px 14px;border-radius:10px;background:rgba(78,168,255,.08);border:1px solid rgba(78,168,255,.28)}
+.sol p{margin:.35em 0}
+.help{font-size:.85rem;color:var(--muted)}
+
+table.tv{border-collapse:collapse;margin:8px 0}
+table.tv th,table.tv td{border:1px solid var(--line);padding:5px 12px;text-align:center}
+table.tv th{background:rgba(157,123,255,.12)}
+
+canvas.plot{width:100%;aspect-ratio:1/1;max-width:330px;display:block;border-radius:12px;border:1px solid var(--line);margin:8px 0;background:#16123a}
+canvas.plot.wide{aspect-ratio:4/3;max-width:none}
+.explorer{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start;margin:10px 0 6px}
+.explorer label.rng{display:block;margin:10px 0 2px;font-weight:700}
+.explorer output{font-family:var(--head);color:var(--amber);margin-left:6px}
+.explorer input[type=range]{width:100%;accent-color:var(--violet)}
+.readout{margin-top:12px;padding:10px 14px;border-radius:12px;background:rgba(18,15,42,.6);border:1px solid var(--line)}
+.readout p{margin:.3em 0}
+.problem{padding:12px 16px;border-radius:14px;background:rgba(255,200,87,.07);border:1px solid rgba(255,200,87,.3);margin:8px 0 12px}
+
+/* Pausa */
+.pausebox{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bigclock{font-family:var(--head);font-weight:800;font-size:3rem;font-variant-numeric:tabular-nums;color:var(--amber)}
+
+/* Reto */
+.rq-head{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;margin-bottom:6px}
+.rq{font-size:1.2rem;padding:14px 16px;border-radius:14px;background:rgba(18,15,42,.6);border:1px solid var(--line);margin-bottom:10px}
+.rbar{height:8px;border-radius:8px;background:#29245a;overflow:hidden;margin-bottom:12px}
+.rbar>div{height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--amber),var(--red))}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.tiles{grid-template-columns:1fr}}
+.tile{font:inherit;font-size:1.02rem;display:flex;gap:12px;align-items:center;text-align:left;border:0;border-radius:14px;padding:16px;color:#fff;cursor:pointer;min-height:70px;transition:opacity .25s,transform .15s}
+.tile:hover:not(:disabled){transform:translateY(-2px)}
+.tile .shape{font-size:1.4rem;line-height:1}
+.tile.t0{background:#d8435b}.tile.t1{background:#3470e0}.tile.t2{background:#c98a14}.tile.t3{background:#23a06c}
+.tile.dim{opacity:.3}
+.tile.right{outline:4px solid #fff;outline-offset:-4px}
+.tile:disabled{cursor:default}
+.rfoot{margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;min-height:40px}
+.retoscore{font-family:var(--head);font-weight:800;font-size:2.4rem}
+
+/* Resultados */
+table.res{border-collapse:collapse;width:100%;margin:10px 0}
+table.res th,table.res td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-variant-numeric:tabular-nums}
+table.res th{color:var(--muted);font-size:.85rem}
+.bar{height:8px;border-radius:8px;background:#29245a;overflow:hidden;min-width:90px}
+.bar>div{height:100%;background:linear-gradient(90deg,var(--violet),var(--green))}
+
+footer{max-width:1120px;margin:10px auto 30px;padding:18px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
+.katex{font-size:1.07em}
+.katex-display{margin:.6em 0;overflow-x:auto;overflow-y:hidden}
+
+@media (max-width:760px){
+  .explorer{grid-template-columns:1fr}
+  .hero .copy{padding:30px 20px 18px}
+  .tapewrap{padding:0 14px 18px}
+  details.block>summary{grid-template-columns:auto 1fr;padding:12px 14px}
+  details.block>summary .pill{grid-column:2}
+  .bbody{padding:2px 14px 18px}
+  .nowblock{display:none}
+}
+
+/* Galera, división sintética y tabla de signos */
+table.galera{border-collapse:collapse;margin:8px 0}
+table.galera td{padding:3px 9px;text-align:right;white-space:nowrap;min-width:52px}
+table.galera td.gd{border-left:2px solid var(--text);border-bottom:2px solid var(--text);text-align:left}
+table.galera td.gq{border-left:2px solid var(--text);text-align:left;color:var(--green)}
+table.galera td.ul{border-bottom:1.5px solid var(--muted)}
+table.galera td.rem{color:var(--amber);font-weight:700}
+table.synth{border-collapse:collapse;margin:8px 0}
+table.synth td{padding:5px 10px;text-align:center;min-width:46px}
+table.synth tr.bot td{border-top:2px solid var(--text)}
+table.synth td.c{border-left:2px solid var(--text);color:var(--amber);font-weight:700}
+table.synth td.r{outline:2px solid var(--amber);outline-offset:-3px;border-radius:6px}
+table.synth td.hl{background:rgba(157,123,255,.22);border-radius:6px}
+table.synth input.ans{width:58px;text-align:center;padding:5px 4px}
+table.signs{border-collapse:collapse;margin:8px 0}
+table.signs th,table.signs td{border:1px solid var(--line);padding:6px 10px;text-align:center;white-space:nowrap}
+table.signs th{background:rgba(157,123,255,.12);font-weight:400}
+table.signs tr.tot td,table.signs tr.tot th{background:rgba(54,216,154,.08);font-weight:700}
+table.signs select.ans{padding:4px 6px}
+.zrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:6px 0;border-top:1px dashed var(--line)}
+.explorer select{font:inherit;background:#0e0b25;color:var(--text);border:1.5px solid var(--line);border-radius:8px;padding:4px 6px}
+.zctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px 10px;align-items:center;margin:8px 0}
+.zctl input[type=range]{width:100%}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="row">
+    <div class="brand">Polinomios: ceros, gráficas y división</div>
+    <div class="nowblock" id="nowblock">Bloque actual: <b>Inicio</b></div>
+    <div class="clock" id="clock">00:00 <small>de 120:00</small></div>
+    <button class="btn small" id="tgo">Iniciar clase</button>
+    <button class="btn ghost small" id="treset">Reiniciar reloj</button>
+    <button class="btn ghost small" id="tbig" aria-pressed="false">Texto grande</button>
+  </div>
+  <div class="progress" aria-hidden="true"><div id="pbar"></div></div>
+  <div class="proglabel" id="plabel">Avance de la práctica: 0 %</div>
+</div>
+
+<main>
+<section class="hero" id="inicio">
+  <canvas id="herocv" aria-hidden="true"></canvas>
+  <div class="copy">
+    <h1>Polinomios: ceros, gráficas y división</h1>
+    <p>Clase interactiva de dos horas para el taller de Matemática General del Proyecto Éxito Académico. De leer los ceros en una gráfica a factorizar por completo con los ceros racionales.</p>
+    <p>Cada bloque trae la idea clave, un ejemplo resuelto paso a paso y práctica con preguntas nuevas cada vez que las pida.</p>
+    <div class="credit">Prof. Josué Méndez Vega</div>
+  </div>
+  <div class="tapewrap">
+    <div class="tape" id="tape"><div class="playhead" id="playhead"></div></div>
+  </div>
+</section>
+
+<!-- ===================== BLOQUE 1 ===================== -->
+<details class="block" id="s1">
+<summary><span class="num">1</span><span><div class="stitle">Ceros y multiplicidad</div><div class="smeta">15 minutos. Ceros, cortes con los ejes y forma de la gráfica en cada cero.</div></span><span class="pill" id="sc-s1">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Si \(P(x)\) tiene el factor \((x-r)^m\) y ya no tiene más factores \((x-r)\), se dice que \(r\) es un <b>cero de multiplicidad</b> \(m\). Los ceros reales son las abscisas de los cortes con el eje \(x\).</p>
+    <p>Si \(m\) es <b>impar</b>, la gráfica <b>atraviesa</b> el eje \(x\) en \(r\) (con \(m=3\) lo atraviesa aplanándose). Si \(m\) es <b>par</b>, la gráfica <b>toca</b> el eje \(x\) y se devuelve.</p>
+    <p>El corte con el eje \(y\) es \((0,P(0))\). El grado es la suma de las multiplicidades, y el término principal decide el comportamiento al infinito.</p>
+  </div>
+
+  <h3>Explorador: ceros y multiplicidades</h3>
+  <div class="explorer">
+    <canvas class="plot wide" id="ex1cv" aria-label="Gráfica del polinomio del explorador"></canvas>
+    <div>
+      <div class="zctl" id="zctl"></div>
+      <label class="rng" for="ex1a">Coeficiente principal</label>
+      <select id="ex1a"><option value="1">positivo (1)</option><option value="-1">negativo (−1)</option></select>
+      <div class="readout" id="ex1out"></div>
+    </div>
+  </div>
+
+  <div class="worked">
+    <p class="enun"><b>Ejemplo resuelto.</b> Analice los ceros de \(P(x)=x^4-3x^3+2x^2\).</p>
+    <div class="step">Factor común \(x^2\): \(P(x)=x^2(x^2-3x+2)\).</div>
+    <div class="step">Factorizamos el trinomio: \(P(x)=x^2(x-1)(x-2)\).</div>
+    <div class="step">Ceros: \(0\) con multiplicidad 2, \(1\) y \(2\) con multiplicidad 1. Cortes con el eje \(x\): \((0,0)\), \((1,0)\), \((2,0)\). Corte con el eje \(y\): \((0,0)\).</div>
+    <div class="step">En \(x=0\) la gráfica toca el eje \(x\) (multiplicidad par); en \(x=1\) y \(x=2\) lo atraviesa (multiplicidad impar).
+      <canvas class="plot" id="wk1cv" aria-label="Gráfica de x a la cuarta menos tres x al cubo más dos x al cuadrado"></canvas></div>
+    <div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>
+  </div>
+
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s1">Nuevas preguntas</button></div>
+  <div class="items" id="s1-items"></div>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 2 ===================== -->
+<details class="block" id="s2">
+<summary><span class="num">2</span><span><div class="stitle">Signo de un polinomio y su gráfica</div><div class="smeta">15 minutos. Factorización, tabla de signos y bosquejo.</div></span><span class="pill" id="sc-s2">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Los ceros dividen la recta real en intervalos. Dentro de cada intervalo el polinomio no cambia de signo, así que basta analizar el signo de cada factor.</p>
+    <p>Un factor \((x-r)\) es negativo a la izquierda de \(r\) y positivo a la derecha. Un factor con exponente par, como \((x-r)^2\), es positivo fuera de \(r\). El signo de \(P\) es el producto de los signos, incluido el del coeficiente principal.</p>
+    <p>Donde \(P(x)>0\) la gráfica está sobre el eje \(x\); donde \(P(x)<0\), debajo.</p>
+  </div>
+
+  <div class="worked">
+    <p class="enun"><b>Ejemplo resuelto.</b> Factorice \(P(x)=-x^3-2x^2+8x\) y analice su signo.</p>
+    <div class="step">Factor común \(-x\): \(P(x)=-x(x^2+2x-8)=-x(x+4)(x-2)\).</div>
+    <div class="step">Ceros: \(-4\), \(0\) y \(2\), todos de multiplicidad 1.</div>
+    <div class="step">Tabla de signos:
+      <div class="scroll"><table class="signs">
+        <tr><th>\(x\)</th><th>\(\left]-\infty,-4\right[\)</th><th>\(\left]-4,0\right[\)</th><th>\(\left]0,2\right[\)</th><th>\(\left]2,+\infty\right[\)</th></tr>
+        <tr><th>\(-1\)</th><td>−</td><td>−</td><td>−</td><td>−</td></tr>
+        <tr><th>\(x+4\)</th><td>−</td><td>+</td><td>+</td><td>+</td></tr>
+        <tr><th>\(x\)</th><td>−</td><td>−</td><td>+</td><td>+</td></tr>
+        <tr><th>\(x-2\)</th><td>−</td><td>−</td><td>−</td><td>+</td></tr>
+        <tr class="tot"><th>\(P(x)\)</th><td>+</td><td>−</td><td>+</td><td>−</td></tr>
+      </table></div></div>
+    <div class="step">\(P\) es positivo en \(\left]-\infty,-4\right[\cup\left]0,2\right[\) y negativo en \(\left]-4,0\right[\cup\left]2,+\infty\right[\).
+      <canvas class="plot" id="wk2cv" aria-label="Gráfica de menos x al cubo menos dos x al cuadrado más ocho x"></canvas></div>
+    <div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>
+  </div>
+
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s2">Nuevas preguntas</button></div>
+  <div class="items" id="s2-items"></div>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 3 ===================== -->
+<details class="block" id="s3">
+<summary><span class="num">3</span><span><div class="stitle">Máximos y mínimos relativos</div><div class="smeta">10 minutos. Lectura de extremos en la gráfica de un polinomio.</div></span><span class="pill" id="sc-s3">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Un <b>máximo relativo</b> es un punto donde la gráfica pasa de crecer a decrecer; un <b>mínimo relativo</b>, donde pasa de decrecer a crecer. Se llaman relativos porque son los valores mayor o menor solo cerca de ese punto.</p>
+    <p>Un polinomio de grado \(n\) tiene a lo sumo \(n-1\) extremos relativos. Entre dos ceros consecutivos hay al menos uno: un máximo si allí \(P(x)>0\), un mínimo si \(P(x)<0\).</p>
+  </div>
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s3">Nuevas preguntas</button></div>
+  <p class="help">En las gráficas, los extremos relativos están marcados con un punto. Lea sus coordenadas en la cuadrícula y compruébelas con el criterio.</p>
+  <div class="items" id="s3-items"></div>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 4 ===================== -->
+<details class="block" id="s4">
+<summary><span class="num">4</span><span><div class="stitle">División de polinomios</div><div class="smeta">15 minutos. División larga y la forma \(P=D\cdot Q+R\).</div></span><span class="pill" id="sc-s4">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Dividir \(P(x)\) entre \(D(x)\) es encontrar un cociente \(Q(x)\) y un residuo \(R(x)\) tales que \[P(x)=D(x)\cdot Q(x)+R(x),\] donde el grado de \(R\) es menor que el grado de \(D\).</p>
+    <p>Antes de empezar, ordene \(P\) en potencias decrecientes y <b>complete con coeficiente cero</b> los términos que falten. En cada paso: divida el primer término, multiplique por el divisor, cambie los signos y sume.</p>
+  </div>
+  <div class="worked" id="wkLong"></div>
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s4">Nuevas preguntas</button></div>
+  <p class="help">Escriba en cada casilla el coeficiente con su signo (por ejemplo <b>-5</b>). Si un término no aparece, escriba <b>0</b>.</p>
+  <div class="items" id="s4-items"></div>
+</div>
+</details>
+
+<!-- ===================== PAUSA ===================== -->
+<details class="block break" id="pausa">
+<summary><span class="num">☕</span><span><div class="stitle">Pausa</div><div class="smeta">5 minutos. Descanso a mitad de la clase.</div></span><span class="pill">5 min</span></summary>
+<div class="bbody">
+  <div class="pausebox">
+    <div class="bigclock" id="pclock">05:00</div>
+    <button class="btn" id="pgo">Iniciar pausa</button>
+    <button class="btn ghost" id="preset">Reiniciar</button>
+  </div>
+  <p class="help">Pregunta para pensar durante la pausa: al dividir \(2x^3-3x^2-2x\) entre \(x-3\) el residuo fue \(21\). ¿Cuánto vale \(P(3)\)? ¿Es casualidad?</p>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 5 ===================== -->
+<details class="block" id="s5">
+<summary><span class="num">5</span><span><div class="stitle">División sintética</div><div class="smeta">15 minutos. División abreviada entre \(x-c\).</div></span><span class="pill" id="sc-s5">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Cuando el divisor es \(x-c\), la división se abrevia trabajando solo con coeficientes. Ojo con el signo: para \(x+3=x-(-3)\) se usa \(c=-3\).</p>
+    <p>Se baja el primer coeficiente; luego se repite: <b>multiplicar por \(c\)</b>, escribir el resultado en la columna siguiente y <b>sumar</b>. La última fila da los coeficientes de \(Q\) (un grado menos que \(P\)) y, al final, el residuo.</p>
+  </div>
+  <div class="worked" id="wkSynth"></div>
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s5">Nuevas preguntas</button></div>
+  <p class="help">Complete la fila del medio y la de abajo. La casilla con borde amarillo es el residuo.</p>
+  <div class="items" id="s5-items"></div>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 6 ===================== -->
+<details class="block" id="s6">
+<summary><span class="num">6</span><span><div class="stitle">Teoremas del residuo y del factor</div><div class="smeta">15 minutos. Residuos sin dividir y prueba de factores.</div></span><span class="pill" id="sc-s6">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p><b>Teorema del residuo:</b> el residuo de dividir \(P(x)\) entre \(x-c\) es \(P(c)\).</p>
+    <p><b>Teorema del factor:</b> \(x-c\) es factor de \(P(x)\) si y solo si \(P(c)=0\), es decir, si \(c\) es un cero de \(P\).</p>
+  </div>
+  <div class="worked">
+    <p class="enun"><b>Ejemplo resuelto.</b> Sin dividir, encuentre el residuo de \(P(x)=-x^3+4x+2\) entre \(x+3\).</p>
+    <div class="step">\(x+3=x-(-3)\), así que \(c=-3\).</div>
+    <div class="step">\(P(-3)=-(-3)^3+4(-3)+2=27-12+2=17\).</div>
+    <div class="step">El residuo es \(17\), el mismo que da la división larga o la sintética. Como no es cero, \(x+3\) no es factor de \(P\).</div>
+    <div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>
+  </div>
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s6">Nuevas preguntas</button></div>
+  <div class="items" id="s6-items"></div>
+</div>
+</details>
+
+<!-- ===================== BLOQUE 7 ===================== -->
+<details class="block" id="s7">
+<summary><span class="num">7</span><span><div class="stitle">Ceros racionales y factorización completa</div><div class="smeta">20 minutos. Candidatos \(p/q\), prueba y división sintética.</div></span><span class="pill" id="sc-s7">0 de 0</span></summary>
+<div class="bbody">
+  <div class="concept">
+    <p>Si \(P(x)=a_nx^n+\cdots+a_0\) tiene coeficientes enteros, todo cero racional tiene la forma \(\dfrac{p}{q}\), donde \(p\) divide al término independiente \(a_0\) y \(q\) divide al coeficiente principal \(a_n\).</p>
+    <p>Procedimiento: liste los candidatos \(\pm\dfrac{p}{q}\), pruébelos hasta encontrar uno con \(P(c)=0\), divida sintéticamente entre \(x-c\) y factorice el cociente.</p>
+  </div>
+  <div class="worked">
+    <p class="enun"><b>Ejemplo resuelto.</b> Encuentre los ceros racionales y factorice \(q(x)=x^3-6x^2+5x+12\).</p>
+    <div class="step">Coeficiente principal \(1\), término independiente \(12\). Candidatos: \(\pm1,\ \pm2,\ \pm3,\ \pm4,\ \pm6,\ \pm12\).</div>
+    <div class="step">Probamos: \(q(3)=27-54+15+12=0\). Entonces \(3\) es cero y \(x-3\) es factor.</div>
+    <div class="step">División sintética entre \(x-3\): <div id="wk7synth"></div></div>
+    <div class="step">\(q(x)=(x-3)(x^2-3x-4)=(x-3)(x-4)(x+1)\). Ceros racionales: \(-1\), \(3\) y \(4\).</div>
+    <div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>
+  </div>
+  <div class="toolbar"><h3>Práctica</h3><button class="btn ghost small" data-regen="s7">Nuevas preguntas</button></div>
+  <p class="help">Escriba los ceros en cualquier orden, como entero o fracción (por ejemplo <b>-3/2</b>).</p>
+  <div class="items" id="s7-items"></div>
+</div>
+</details>
+
+<!-- ===================== RETO ===================== -->
+<details class="block reto" id="reto">
+<summary><span class="num">★</span><span><div class="stitle">Reto relámpago</div><div class="smeta">5 minutos. Ocho preguntas de todo el tema, 20 segundos cada una.</div></span><span class="pill" id="sc-reto">0 de 8</span></summary>
+<div class="bbody">
+  <div id="retoArea">
+    <p>Proyecte esta sección y pida a los estudiantes que respondan en voz alta o por grupos. Las preguntas se generan al azar en cada ronda.</p>
+    <button class="btn" id="retoGo">Comenzar reto</button>
+  </div>
+</div>
+</details>
+
+<!-- ===================== RESULTADOS ===================== -->
+<details class="block" id="resultados">
+<summary><span class="num">✓</span><span><div class="stitle">Resultados de la sesión</div><div class="smeta">Resumen de aciertos e intentos por bloque.</div></span><span class="pill" id="sc-total">0 %</span></summary>
+<div class="bbody">
+  <button class="btn" id="resGo">Actualizar resultados</button>
+  <div id="resArea"></div>
+</div>
+</details>
+</main>
+
+<footer>Clase interactiva: polinomios, ceros, gráficas y división. Elaborada por Prof. Josué Méndez Vega.</footer>
+<script>
+const R = String.raw;
+const $ = s => document.querySelector(s);
+const COL = {violet:'#9d7bff', blue:'#4ea8ff', green:'#36d89a', red:'#ff6b81', amber:'#ffc857', text:'#ece9ff', muted:'#a8a3d1', pink:'#ff8fd1'};
+
+/* ---------------- Utilidades numéricas ---------------- */
+function ri(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function ri0(a,b){ let v; do { v = ri(a,b); } while (v === 0); return v; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(arr){ const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a; }
+function fr(n,d=1){ if (d<0){ n=-n; d=-d; } const g = gcd(n,d)||1; n = n/g; d = d/g; return {n: n===0?0:n, d: n===0?1:d}; }
+function F(x){ return typeof x === 'number' ? fr(x) : x; }
+function fadd(a,b){ a=F(a); b=F(b); return fr(a.n*b.d + b.n*a.d, a.d*b.d); }
+function fsub(a,b){ a=F(a); b=F(b); return fr(a.n*b.d - b.n*a.d, a.d*b.d); }
+function fmul(a,b){ a=F(a); b=F(b); return fr(a.n*b.n, a.d*b.d); }
+function fdiv(a,b){ a=F(a); b=F(b); return fr(a.n*b.d, a.d*b.n); }
+function fneg(a){ a=F(a); return fr(-a.n, a.d); }
+function fval(a){ a=F(a); return a.n/a.d; }
+function feq(a,b){ a=F(a); b=F(b); return a.n===b.n && a.d===b.d; }
+
+/* ---------------- Utilidades TeX ---------------- */
+function ftex(a){ a=F(a); if (a.d===1) return String(a.n); return (a.n<0?'-':'') + R`\frac{${Math.abs(a.n)}}{${a.d}}`; }
+function coefTerm(c,v,first){
+  c = F(c); if (c.n===0) return '';
+  const neg = c.n<0, a = fr(Math.abs(c.n), c.d);
+  const body = (v && a.n===1 && a.d===1) ? v : ftex(a) + v;
+  if (first) return (neg?'-':'') + body;
+  return (neg?' - ':' + ') + body;
+}
+function polyTex(terms){ let s=''; for (const [c,v] of terms){ s += coefTerm(c,v,s===''); } return s || '0'; }
+function lin(m,b,v='x'){ return polyTex([[m,v],[b,'']]); }
+function minusTex(v){ v=F(v); if (v.n===0) return ''; return v.n>0 ? ' - '+ftex(v) : ' + '+ftex(fneg(v)); }
+function mCoef(m){ m=F(m); if (m.n===m.d) return ''; if (m.n===-m.d) return '-'; return ftex(m); }
+function par(v){ v=F(v); return v.n<0 ? R`\left(${ftex(v)}\right)` : ftex(v); }
+function pt(x,y){ const t = v => typeof v==='string' ? v : ftex(v); return R`\left(${t(x)},\,${t(y)}\right)`; }
+function aPre(a){ a=F(a); if (a.n===a.d) return ''; if (a.n===-a.d) return '-'; return ftex(a); }
+function sqTex(h,v='x'){ h=F(h); return h.n===0 ? v+'^2' : R`\left(${polyTex([[1,v],[fneg(h),'']])}\right)^2`; }
+function canon(a,h,k,v='x'){ return aPre(a) + sqTex(h,v) + coefTerm(F(k),'',false); }
+function texNum(v){ return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, R`\,`); }
+function fmtNum(v){ return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+function money(cur,v){ return cur + fmtNum(v); }
+function pow(k){ return k===0 ? '' : k===1 ? 'x' : 'x^{'+k+'}'; }
+
+/* ---------------- Lectura de respuestas ---------------- */
+function parseNum(s){
+  s = (s||'').trim().replace(/\s+/g,'').replace(/[−–]/g,'-').replace(/,/g,'.');
+  if (!s) return NaN;
+  let m = s.match(/^([+-]?\d*\.?\d+)\/([+-]?\d*\.?\d+)$/);
+  if (m){ const d = parseFloat(m[2]); return d===0 ? NaN : parseFloat(m[1])/d; }
+  m = s.match(/^([+-]?)\(([+-]?\d*\.?\d+)\/(\d*\.?\d+)\)$/);
+  if (m){ const d = parseFloat(m[3]); return d===0 ? NaN : (m[1]==='-'?-1:1)*parseFloat(m[2])/d; }
+  if (/^[+-]?\d*\.?\d+$/.test(s)) return parseFloat(s);
+  return NaN;
+}
+function near(s,target){ const v = parseNum(s); return !isNaN(v) && Math.abs(v - fval(target)) < 1e-6; }
+
+function renderMath(el){
+  if (window.renderMathInElement) renderMathInElement(el, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}], throwOnError:false});
+}
+
+/* ---------------- Puntuación ---------------- */
+const SECTIONS = [
+  {id:'s1', name:'Ceros y multiplicidad'},
+  {id:'s2', name:'Signo y gráfica'},
+  {id:'s3', name:'Máximos y mínimos relativos'},
+  {id:'s4', name:'División de polinomios'},
+  {id:'s5', name:'División sintética'},
+  {id:'s6', name:'Teoremas del residuo y del factor'},
+  {id:'s7', name:'Ceros racionales'},
+  {id:'reto', name:'Reto relámpago'}
+];
+const score = {};
+SECTIONS.forEach(s => score[s.id] = {ok:0, goal:0, totOk:0, totTries:0, best:0});
+function resetSet(id, goal){ const s = score[id]; s.ok = 0; s.goal = goal; updateScore(id); }
+function addTry(id, ok){ const s = score[id]; s.totTries++; if (ok){ s.ok++; s.totOk++; } s.best = Math.max(s.best, s.goal ? Math.min(1, s.ok/s.goal) : 0); updateScore(id); }
+function updateScore(id){
+  const s = score[id], el = document.getElementById('sc-'+id);
+  if (el){ el.textContent = `${Math.min(s.ok,s.goal)} de ${s.goal}`; el.classList.toggle('full', s.goal>0 && s.ok>=s.goal); }
+  updateProgress();
+}
+function updateProgress(){
+  const list = SECTIONS.map(s => score[s.id]);
+  const p = list.reduce((acc,s)=>acc+s.best,0)/list.length;
+  const pct = Math.round(p*100);
+  const bar = $('#pbar'); if (bar) bar.style.width = pct+'%';
+  const lab = $('#plabel'); if (lab) lab.textContent = `Avance de la práctica: ${pct} %`;
+  const tot = $('#sc-total'); if (tot) tot.textContent = pct+' %';
+}
+
+/* ---------------- Componentes de ejercicios ---------------- */
+function inp(name,label){ return `<label class="fld"><span>${label}</span><input class="ans" data-f="${name}" autocomplete="off" spellcheck="false"></label>`; }
+function sel(name,label,opts){ return `<label class="fld"><span>${label}</span><select class="ans" data-f="${name}"><option value="">elegir</option>${opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`; }
+function fieldsOf(div){ const o = {}; div.querySelectorAll('[data-f]').forEach(e => o[e.dataset.f] = e); return o; }
+
+function makeItem(sec, box, html, checker, sol, after){
+  const div = document.createElement('div'); div.className = 'item';
+  div.innerHTML = html + `<div class="acts"><button class="btn small" data-a="check">Comprobar</button><button class="btn ghost small" data-a="sol">Ver solución</button></div><div class="fb" role="status" aria-live="polite"></div><div class="sol" hidden>${sol}</div>`;
+  box.appendChild(div);
+  let solved = false, t = null, afterDone = false;
+  const fb = div.querySelector('.fb');
+  const runAfter = () => { if (after && !afterDone){ afterDone = true; after(div); } };
+  const check = () => {
+    if (solved) return;
+    const f = fieldsOf(div);
+    const r = checker(f);
+    clearTimeout(t);
+    if (r.incomplete){ fb.className='fb warn'; fb.textContent = r.incomplete; t = setTimeout(()=>{ fb.className='fb'; fb.textContent=''; }, 2600); return; }
+    div.querySelectorAll('.ans').forEach(e => e.classList.remove('ok','bad'));
+    r.fields.forEach(([el,ok]) => el.classList.add(ok?'ok':'bad'));
+    addTry(sec, r.ok);
+    if (r.ok){
+      solved = true; div.classList.add('solved');
+      fb.className = 'fb ok'; fb.innerHTML = r.msg || 'Correcto.';
+      div.querySelectorAll('.ans').forEach(e => e.disabled = true);
+      div.querySelector('[data-a=check]').disabled = true;
+      runAfter();
+    } else {
+      fb.className = 'fb bad'; fb.innerHTML = r.msg || 'Hay respuestas incorrectas (en rojo). Revíselas e intente de nuevo.';
+      t = setTimeout(()=>{ fb.className='fb'; fb.innerHTML=''; div.querySelectorAll('.ans.bad').forEach(e=>e.classList.remove('bad')); }, 3000);
+    }
+    renderMath(fb);
+  };
+  div.querySelector('[data-a=check]').addEventListener('click', check);
+  div.querySelectorAll('input.ans').forEach(e => e.addEventListener('keydown', ev => { if (ev.key==='Enter') check(); }));
+  div.querySelector('[data-a=sol]').addEventListener('click', e => {
+    const s = div.querySelector('.sol'); s.hidden = !s.hidden;
+    e.target.textContent = s.hidden ? 'Ver solución' : 'Ocultar solución';
+    if (!s.hidden) runAfter();
+  });
+  renderMath(div);
+  return div;
+}
+
+function makeChoice(sec, box, html, opts, sol){
+  const div = document.createElement('div'); div.className = 'item';
+  div.innerHTML = html + `<div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o.html}</button>`).join('')}</div><div class="acts"><button class="btn ghost small" data-a="sol">Ver solución</button></div><div class="fb" role="status" aria-live="polite"></div><div class="sol" hidden>${sol}</div>`;
+  box.appendChild(div);
+  let solved = false, t = null;
+  const fb = div.querySelector('.fb');
+  div.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+    if (solved) return;
+    const ok = opts[+b.dataset.i].ok;
+    clearTimeout(t);
+    addTry(sec, ok);
+    if (ok){
+      solved = true; b.classList.add('ok'); div.classList.add('solved');
+      div.querySelectorAll('.opt').forEach(x => x.disabled = true);
+      fb.className = 'fb ok'; fb.textContent = 'Correcto.';
+    } else {
+      b.classList.add('bad'); fb.className = 'fb bad'; fb.textContent = 'No es correcto. Intente de nuevo.';
+      t = setTimeout(()=>{ b.classList.remove('bad'); fb.className='fb'; fb.textContent=''; }, 1800);
+    }
+  }));
+  div.querySelector('[data-a=sol]').addEventListener('click', e => {
+    const s = div.querySelector('.sol'); s.hidden = !s.hidden;
+    e.target.textContent = s.hidden ? 'Ver solución' : 'Ocultar solución';
+  });
+  renderMath(div);
+  return div;
+}
+
+/* ---------------- Gráficas en canvas ---------------- */
+function niceStep(r){ const p = Math.pow(10, Math.floor(Math.log10(r))); const n = r/p; return (n<1.5?1:n<3.5?2:n<7.5?5:10)*p; }
+function plot(cv, o){
+  const W = cv.clientWidth, H = cv.clientHeight;
+  if (!W || !H) return;
+  const c = cv.getContext && cv.getContext('2d'); if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  c.setTransform(dpr,0,0,dpr,0,0);
+  let {xmin,xmax,ymin,ymax} = o;
+  if (o.equal){ const cy = (ymin+ymax)/2, span = (xmax-xmin)*H/W; ymin = cy-span/2; ymax = cy+span/2; }
+  const X = x => (x-xmin)/(xmax-xmin)*W, Y = y => H-(y-ymin)/(ymax-ymin)*H;
+  c.fillStyle = '#16123a'; c.fillRect(0,0,W,H);
+  const sx = o.xstep || niceStep((xmax-xmin)/12), sy = o.ystep || niceStep((ymax-ymin)/10);
+  c.lineWidth = 1; c.strokeStyle = 'rgba(168,163,209,.14)';
+  for (let x = Math.ceil(xmin/sx)*sx; x <= xmax+1e-9; x += sx){ c.beginPath(); c.moveTo(Math.round(X(x))+.5,0); c.lineTo(Math.round(X(x))+.5,H); c.stroke(); }
+  for (let y = Math.ceil(ymin/sy)*sy; y <= ymax+1e-9; y += sy){ c.beginPath(); c.moveTo(0,Math.round(Y(y))+.5); c.lineTo(W,Math.round(Y(y))+.5); c.stroke(); }
+  c.strokeStyle = 'rgba(236,233,255,.6)'; c.lineWidth = 1.4;
+  if (xmin<=0 && xmax>=0){ c.beginPath(); c.moveTo(X(0),0); c.lineTo(X(0),H); c.stroke(); }
+  if (ymin<=0 && ymax>=0){ c.beginPath(); c.moveTo(0,Y(0)); c.lineTo(W,Y(0)); c.stroke(); }
+  if (!o.noLabels){
+    c.fillStyle = 'rgba(200,196,235,.75)'; c.font = '11px "Atkinson Hyperlegible", system-ui, sans-serif';
+    const lx = Math.min(Math.max(Y(0)+13, 13), H-4);
+    c.textAlign = 'center';
+    const everyX = (W/((xmax-xmin)/sx) < 20) ? 2 : 1;
+    let i = 0;
+    for (let x = Math.ceil(xmin/sx)*sx; x <= xmax+1e-9; x += sx, i++){ const xv = +x.toFixed(6); if (xv!==0 && i%everyX===0 && X(x)>8 && X(x)<W-8) c.fillText(String(xv), X(x), lx); }
+    c.textAlign = 'right';
+    const ly = Math.min(Math.max(X(0)-5, 24), W-4);
+    const everyY = (H/((ymax-ymin)/sy) < 16) ? 2 : 1;
+    i = 0;
+    for (let y = Math.ceil(ymin/sy)*sy; y <= ymax+1e-9; y += sy, i++){ const yv = +y.toFixed(6); if (yv!==0 && i%everyY===0 && Y(y)>8 && Y(y)<H-6) c.fillText(String(yv), ly, Y(y)+4); }
+  }
+  (o.vlines||[]).forEach(v => { c.save(); c.strokeStyle = v.color; c.setLineDash([6,5]); c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(v.x),0); c.lineTo(X(v.x),H); c.stroke(); c.restore(); });
+  (o.funcs||[]).forEach(fn => {
+    c.save(); c.strokeStyle = fn.color; c.lineWidth = fn.width || 2.6; c.lineJoin = 'round';
+    if (fn.dash) c.setLineDash(fn.dash);
+    const a = fn.dom ? Math.max(fn.dom[0],xmin) : xmin, b = fn.dom ? Math.min(fn.dom[1],xmax) : xmax;
+    const N = 500; let pen = false; c.beginPath();
+    const span = ymax-ymin;
+    for (let i=0;i<=N;i++){
+      const x = a + (b-a)*i/N, y = fn.f(x);
+      if (!isFinite(y) || y < ymin-2*span || y > ymax+2*span){ pen = false; continue; }
+      if (pen) c.lineTo(X(x),Y(y)); else { c.moveTo(X(x),Y(y)); pen = true; }
+    }
+    c.stroke(); c.restore();
+  });
+  (o.segs||[]).forEach(s => { c.save(); c.strokeStyle = s.color; c.lineWidth = s.width||2; if (s.dash) c.setLineDash(s.dash); c.beginPath(); s.pts.forEach(([x,y],i)=> i? c.lineTo(X(x),Y(y)) : c.moveTo(X(x),Y(y))); c.stroke(); c.restore(); });
+  (o.points||[]).forEach(p => {
+    c.save(); c.fillStyle = p.color || COL.amber; c.strokeStyle = '#16123a'; c.lineWidth = 2;
+    c.beginPath(); c.arc(X(p.x),Y(p.y),p.r||5,0,Math.PI*2); c.fill(); c.stroke();
+    if (p.label){ c.fillStyle = COL.text; c.font = 'bold 12px "Atkinson Hyperlegible", system-ui, sans-serif'; c.textAlign = X(p.x) > W-90 ? 'right' : 'left'; c.fillText(p.label, X(p.x) + (c.textAlign==='right'?-9:9), Y(p.y)-9); }
+    c.restore();
+  });
+}
+const RO = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(es => es.forEach(e => { const cv = e.target; if (cv._opt) plot(cv, cv._opt); })) : null;
+function setPlot(cv, o){ cv._opt = o; if (RO) RO.observe(cv); plot(cv, o); }
+function lineGraphOpts(fs, pts){ return {xmin:-6,xmax:6,ymin:-6,ymax:6,xstep:1,ystep:1,funcs:fs,points:pts||[]}; }
+
+
+/* ============================================================
+   UTILIDADES DE POLINOMIOS
+   ============================================================ */
+function pmul(a,b){ const r = Array(a.length+b.length-1).fill(0); a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y)); return r; }
+function pfromRoots(lead, roots){ let p = [lead]; roots.forEach(r => p = pmul(p,[1,-r])); return p; }
+function pfromZeros(lead, zs){ let p = [lead]; zs.forEach(z => { for (let i=0;i<z.m;i++) p = pmul(p,[1,-z.r]); }); return p; }
+function peval(p,x){ return p.reduce((a,c)=>a*x+c, 0); }
+function powv(k){ return k===0 ? '' : k===1 ? 'x' : 'x^{'+k+'}'; }
+function ptex(p){ const n = p.length-1; return polyTex(p.map((c,i)=>[c, powv(n-i)])); }
+function xmc(c){ return polyTex([[1,'x'],[-c,'']]); }
+function factorTex(r,m){ const base = r===0 ? 'x' : R`\left(${xmc(r)}\right)`; return m===1 ? base : base+'^{'+m+'}'; }
+function factTex(lead, zs){ return aPre(lead) + zs.map(z => factorTex(z.r,z.m)).join(''); }
+function genZeros(count, mults){ return shuffle([-4,-3,-2,-1,0,1,2,3,4]).slice(0,count).sort((a,b)=>a-b).map(r => ({r, m:pick(mults)})); }
+function sgn(v){ return v>0 ? '+' : '−'; }
+function addRem(rem){ const t = ptex(rem); if (t==='0') return ''; return t[0]==='-' ? ' - '+t.slice(1) : ' + '+t; }
+function substTex(p,c){
+  const n = p.length-1; let s = '';
+  p.forEach((e,i) => { if (e===0) return; const k = n-i;
+    const body = k===0 ? String(Math.abs(e)) : (Math.abs(e)===1 ? '' : Math.abs(e)+R`\cdot `) + par(c) + (k>1 ? '^{'+k+'}' : '');
+    s += s==='' ? (e<0?'-':'')+body : (e<0?' - ':' + ')+body; });
+  return s || '0';
+}
+function matchSet(els, targets){
+  const used = targets.map(()=>false);
+  return els.map(e => { const v = parseNum(e.value); const k = targets.findIndex((t,j)=>!used[j] && !isNaN(v) && Math.abs(v-fval(t))<1e-6); if (k>=0){ used[k]=true; return [e,true]; } return [e,false]; });
+}
+function autoPolyOpts(p, xmin, xmax, extra){
+  let Y = 1; for (let i=0;i<=200;i++){ const x = xmin+(xmax-xmin)*i/200; Y = Math.max(Y, Math.abs(peval(p,x))); }
+  Y *= 1.12;
+  return Object.assign({xmin, xmax, ymin:-Y, ymax:Y, xstep:1, ystep:niceStep(2*Y/9), funcs:[{f:x=>peval(p,x), color:COL.violet, width:3}]}, extra||{});
+}
+
+/* ---------- División sintética ---------- */
+function synth(p,c){ const b = [p[0]], mid = [null]; for (let i=1;i<p.length;i++){ mid.push(b[i-1]*c); b.push(p[i]+mid[i]); } return {mid, b}; }
+function synthTable(p, c, upto){
+  const {mid, b} = synth(p,c), n = p.length; if (upto===undefined) upto = n;
+  const td = (v,cls) => `<td class="${cls||''}">${v===null||v===undefined ? '' : R`\(${v}\)`}</td>`;
+  let h = '<div class="scroll"><table class="synth">';
+  h += '<tr>' + p.map(v => td(v)).join('') + td(c,'c') + '</tr>';
+  h += '<tr>' + mid.map((v,i) => td(i>0 && i<upto ? v : null, (i>0 && i===upto-1) ? 'hl' : '')).join('') + '<td class="c"></td></tr>';
+  h += '<tr class="bot">' + b.map((v,i) => td(i<upto ? v : null, (i===n-1?'r ':'') + (i===upto-1?'hl':''))).join('') + '<td></td></tr>';
+  return h + '</table></div>';
+}
+function synthWorked(el, p, c){
+  const {mid, b} = synth(p,c), n = p.length;
+  const Q = b.slice(0,-1), Rr = b[n-1];
+  let h = R`<p class="enun"><b>Ejemplo resuelto.</b> Divida \(P(x)=${ptex(p)}\) entre \(D(x)=${xmc(c)}\) mediante división sintética.</p>`;
+  h += R`<div class="step">Escribimos los coeficientes de \(P\), con cero en los términos que faltan, y a la derecha \(c=${c}\).${synthTable(p,c,0)}</div>`;
+  h += R`<div class="step">Bajamos el primer coeficiente, \(${b[0]}\).${synthTable(p,c,1)}</div>`;
+  for (let i=1;i<n;i++) h += R`<div class="step">Multiplicamos \(${b[i-1]}\cdot ${par(c)}=${mid[i]}\) y sumamos \(${p[i]}+${par(mid[i])}=${b[i]}\).${synthTable(p,c,i+1)}</div>`;
+  h += R`<div class="step">\(Q(x)=${ptex(Q)}\) y \(R(x)=${Rr}\). Así, \(P(x)=\left(${xmc(c)}\right)\left(${ptex(Q)}\right)${addRem([Rr])}\).</div>`;
+  h += `<div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>`;
+  el.innerHTML = h;
+}
+
+/* ---------- División larga (divisor mónico) ---------- */
+function longDiv(p, d){
+  const n = p.length-1, k = d.length-1, r = p.slice(), q = [], steps = [];
+  for (let i=0;i<=n-k;i++){ const before = r.slice(); const qi = r[i]; q.push(qi); const sub = d.map(x => x*qi); for (let j=0;j<=k;j++) r[i+j] -= sub[j]; steps.push({i, qi, sub, before, r:r.slice()}); }
+  return {q, rem:r.slice(n-k+1), steps};
+}
+function termTex(c, deg, lead){ const v = powv(deg); if (c===0) return (lead?'':'+') + '0' + v; const s = coefTerm(c, v, true); return (lead || c<0) ? s : '+'+s; }
+function galeraTable(p, d, ns){
+  const n = p.length-1, k = d.length-1, L = longDiv(p,d);
+  if (ns===undefined) ns = L.steps.length;
+  const cell = (t,cls) => `<td class="${cls||''}">${t ? R`\(${t}\)` : ''}</td>`;
+  const qTex = ns===0 ? '' : polyTex(L.q.slice(0,ns).map((c,j)=>[c, powv(n-k-j)]));
+  let rows = [];
+  rows.push(p.map((c,i) => cell(termTex(c, n-i, i===0))).join('') + cell(ptex(d),'gd'));
+  if (ns===0) rows.push(p.map(()=>cell('')).join('') + cell('','gq'));
+  for (let s=0;s<ns;s++){
+    const st = L.steps[s], i = st.i;
+    rows.push(p.map((_,col) => (col>=i && col<=i+k) ? cell(termTex(-st.sub[col-i], n-col, false), 'ul') : cell('')).join('') + (s===0 ? cell(qTex,'gq') : cell('')));
+    const last = s===L.steps.length-1, hi = Math.min(i+k+1, n);
+    rows.push(p.map((_,col) => (col>=i+1 && col<=hi) ? cell(termTex(st.r[col], n-col, col===i+1), last ? 'rem' : '') : cell('')).join('') + cell(''));
+  }
+  return `<div class="scroll"><table class="galera">${rows.map(r=>'<tr>'+r+'</tr>').join('')}</table></div>`;
+}
+function longWorked(el, p, d){
+  const n = p.length-1, k = d.length-1, L = longDiv(p,d);
+  let h = R`<p class="enun"><b>Ejemplo resuelto.</b> Divida \(P(x)=${ptex(p)}\) entre \(D(x)=${ptex(d)}\) y exprese \(P=D\cdot Q+R\).</p>`;
+  h += R`<div class="step">Ordenamos y completamos con cero el término que falta: \(${p.map((c,i)=>termTex(c,n-i,i===0)).join(' ')}\).${galeraTable(p,d,0)}</div>`;
+  L.steps.forEach((st,s) => {
+    const lt = termTex(st.before[st.i], n-st.i, true), qt = termTex(st.qi, n-k-st.i, true);
+    h += R`<div class="step">Dividimos \(${lt}\) entre \(${powv(k)}\): \(${qt}\). Multiplicamos \(${qt}\) por \(${ptex(d)}\), cambiamos los signos y sumamos${s<L.steps.length-1?' (bajamos el término siguiente)':''}.${galeraTable(p,d,s+1)}</div>`;
+  });
+  h += R`<div class="step">\(Q(x)=${ptex(L.q)}\) y \(R(x)=${ptex(L.rem)}\). Por tanto, \(P(x)=\left(${ptex(d)}\right)\left(${ptex(L.q)}\right)${addRem(L.rem)}\).</div>`;
+  h += `<div class="wk-acts"><button class="btn small next">Siguiente paso</button><button class="btn ghost small reset">Reiniciar</button><span class="count"></span></div>`;
+  el.innerHTML = h;
+}
+
+/* ============================================================
+   BLOQUE 1: ceros y multiplicidad
+   ============================================================ */
+function itemCeros(box){
+  let zs; do { zs = genZeros(3,[1,1,2,2,3]); } while (zs.reduce((a,z)=>a+z.m,0) > 6);
+  const a = pick([1,-1,2,-2]), p = pfromZeros(a,zs), deg = p.length-1, p0 = p[p.length-1];
+  const rows = zs.map((z,i) => `<div class="zrow"><span>${R`En \(x=${z.r}\):`}</span>${inp('m'+i,'multiplicidad')}${sel('c'+i,'la gráfica',[['a','atraviesa el eje'],['t','toca el eje']])}</div>`).join('');
+  const html = R`<p class="tag">Ceros y multiplicidad</p><p>\(P(x)=${factTex(a,zs)}\)</p><div class="fields">${inp('g','Grado:')}${inp('y',R`Corte con el eje \(y\): \((0,\)`)}<span>\()\)</span></div>${rows}`;
+  const fac0 = zs.map(z => (z.r===0 ? '(0)' : R`\left(${-z.r}\right)`) + (z.m>1 ? '^{'+z.m+'}' : '')).join(R`\cdot `);
+  const prodTex = (a===1 ? '' : a===-1 ? '-' : a+R`\cdot `) + fac0;
+  const sol = R`<p>Grado: \(${zs.map(z=>z.m).join('+')}=${deg}\).</p><p>Sustituyendo \(x=0\): \(P(0)=${prodTex}=${p0}\), así que el corte con el eje \(y\) es \(${pt(0,p0)}\).</p>` +
+    zs.map(z => R`<p>\(x=${z.r}\): multiplicidad ${z.m}, ${z.m%2 ? 'impar: la gráfica atraviesa el eje' : 'par: la gráfica toca el eje y se devuelve'}.</p>`).join('');
+  makeItem('s1', box, html, f => {
+    const all = [f.g, f.y, ...zs.flatMap((_,i)=>[f['m'+i], f['c'+i]])];
+    if (all.some(e => !e.value.trim())) return {incomplete:'Complete todos los espacios.'};
+    const fields = [[f.g, near(f.g.value,deg)], [f.y, near(f.y.value,p0)]];
+    zs.forEach((z,i) => { fields.push([f['m'+i], near(f['m'+i].value, z.m)]); fields.push([f['c'+i], f['c'+i].value === (z.m%2 ? 'a' : 't')]); });
+    return {ok: fields.every(x=>x[1]), fields};
+  }, sol);
+}
+
+function itemGraficaCriterio(box){
+  const r = tryGen(() => {
+    let zs; do { zs = genZeros(3,[1,2]); } while (zs.reduce((a,z)=>a+z.m,0) > 5);
+    const a = pick([1,-1]);
+    const flip = zs.map(z=>({...z})); const j = ri(0,2); flip[j].m = 3-flip[j].m;
+    const mir = zs.map(z=>({...z})); const jj = ri(0,2); let nr = -mir[jj].r;
+    if (nr===mir[jj].r || zs.some(z=>z.r===nr)) nr = mir[jj].r + (zs.some(z=>z.r===mir[jj].r+1) ? -1 : 1);
+    if (zs.some((z,k)=>k!==jj && z.r===nr)) return null;
+    mir[jj].r = nr; mir.sort((u,v)=>u.r-v.r);
+    const T = (aa,zz) => R`\(P(x)=${factTex(aa,zz)}\)`;
+    const m = mc(T(a,zs), [T(-a,zs), T(a,flip), T(a,mir)]); if (!m) return null;
+    return {zs, a, m};
+  });
+  const {zs, a, m} = r;
+  const p = pfromZeros(a,zs);
+  const html = `<p class="tag">De la gráfica al criterio</p><p>¿Cuál criterio corresponde a la gráfica?</p><canvas class="plot" aria-label="Gráfica de un polinomio"></canvas>`;
+  const sol = R`<p>Ceros: ${zs.map(z => R`\(${z.r}\) (${z.m%2?'atraviesa, multiplicidad impar':'toca, multiplicidad par'})`).join(', ')}.</p><p>Hacia la derecha la gráfica ${a>0?'sube':'baja'}, así que el coeficiente principal es ${a>0?'positivo':'negativo'}.</p><p>Criterio: \(P(x)=${factTex(a,zs)}\).</p>`;
+  const div = makeChoice('s1', box, html, m.opts.map((s,i)=>({html:s, ok:i===m.ans})), sol);
+  const xmin = zs[0].r-1.6, xmax = zs[2].r+1.6;
+  setPlot(div.querySelector('canvas'), autoPolyOpts(p, xmin, xmax, {points: zs.map(z=>({x:z.r, y:0, color:COL.amber, r:4}))}));
+}
+
+function genS1(){
+  const box = $('#s1-items'); box.innerHTML = '';
+  itemCeros(box); itemCeros(box); itemGraficaCriterio(box); itemGraficaCriterio(box);
+  resetSet('s1', 4);
+}
+
+function initEx1(){
+  const ctl = $('#zctl'), defs = [[-3,1],[0,2],[2,1]];
+  ctl.innerHTML = defs.map(([r,m],i) => `<label for="zr${i}">Cero ${i+1}</label><input type="range" id="zr${i}" min="-4" max="4" step="1" value="${r}"><select id="zm${i}" aria-label="Multiplicidad del cero ${i+1}"><option value="0">sin usar</option><option value="1"${m===1?' selected':''}>mult. 1</option><option value="2"${m===2?' selected':''}>mult. 2</option><option value="3">mult. 3</option></select>`).join('');
+  const upd = () => {
+    const a = +$('#ex1a').value; const map = new Map();
+    for (let i=0;i<3;i++){ const r = +$('#zr'+i).value, m = +$('#zm'+i).value; if (m>0) map.set(r, (map.get(r)||0)+m); }
+    const zs = [...map.entries()].map(([r,m])=>({r,m})).sort((u,v)=>u.r-v.r);
+    const p = pfromZeros(a, zs), deg = p.length-1, out = $('#ex1out');
+    const pos = a>0 ? '+' : '-', neg = deg%2===0 ? pos : (a>0 ? '-' : '+');
+    out.innerHTML = (zs.length ? R`<p>\(P(x)=${factTex(a,zs)}\)</p><p>Grado \(${deg}\). Corte con el eje \(y\): \(${pt(0,p[deg])}\).</p>` + zs.map(z => R`<p>\(x=${z.r}\): multiplicidad ${z.m}, la gráfica <b>${z.m%2 ? (z.m===3?'atraviesa aplanándose':'atraviesa') : 'toca y se devuelve'}</b>.</p>`).join('') +
+      R`<p>Si \(x\to+\infty\), \(P(x)\to${pos}\infty\); si \(x\to-\infty\), \(P(x)\to${neg}\infty\).</p>` : R`<p>\(P(x)=${a}\): sin ceros. Active al menos un cero.</p>`);
+    renderMath(out);
+    setPlot($('#ex1cv'), autoPolyOpts(p, -5.5, 5.5, {points: zs.map(z=>({x:z.r, y:0, color:COL.amber, r:5}))}));
+  };
+  ctl.querySelectorAll('input,select').forEach(e => e.addEventListener('input', upd));
+  $('#ex1a').addEventListener('input', upd); upd();
+}
+
+/* ============================================================
+   BLOQUE 2: signo y gráfica
+   ============================================================ */
+const IVL = (zs) => { const rs = zs.map(z=>z.r); const out = [];
+  out.push({tex:R`\left]-\infty,${rs[0]}\right[`, t:rs[0]-1});
+  for (let i=1;i<rs.length;i++) out.push({tex:R`\left]${rs[i-1]},${rs[i]}\right[`, t:(rs[i-1]+rs[i])/2});
+  out.push({tex:R`\left]${rs[rs.length-1]},+\infty\right[`, t:rs[rs.length-1]+1});
+  return out; };
+function signTableHTML(a, zs){
+  const iv = IVL(zs); let h = `<div class="scroll"><table class="signs"><tr><th>\\(x\\)</th>${iv.map(v=>`<th>\\(${v.tex}\\)</th>`).join('')}</tr>`;
+  if (a!==1) h += `<tr><th>\\(${a}\\)</th>${iv.map(()=>`<td>${sgn(a)}</td>`).join('')}</tr>`;
+  zs.forEach(z => { h += `<tr><th>\\(${factorTex(z.r,z.m)}\\)</th>${iv.map(v=>`<td>${sgn(Math.pow(v.t-z.r, z.m))}</td>`).join('')}</tr>`; });
+  const p = pfromZeros(a,zs);
+  h += `<tr class="tot"><th>\\(P(x)\\)</th>${iv.map(v=>`<td>${sgn(peval(p,v.t))}</td>`).join('')}</tr></table></div>`;
+  return h;
+}
+function itemSignos(box){
+  const zs = genZeros(3,[1,1,1,2]), a = pick([1,-1,2,-1]), p = pfromZeros(a,zs), iv = IVL(zs);
+  const exp = iv.map(v => peval(p,v.t) > 0 ? '+' : '-');
+  const table = `<div class="scroll"><table class="signs"><tr><th>\\(x\\)</th>${iv.map(v=>`<th>\\(${v.tex}\\)</th>`).join('')}</tr><tr><th>Signo de \\(P(x)\\)</th>${iv.map((_,i)=>`<td><select class="ans" data-f="s${i}" aria-label="Signo en el intervalo ${i+1}"><option value="">?</option><option value="+">+</option><option value="-">−</option></select></td>`).join('')}</tr></table></div>`;
+  const html = R`<p class="tag">Tabla de signos</p><p>Complete el signo de \(P(x)=${factTex(a,zs)}\) en cada intervalo.</p>${table}`;
+  const sol = `<p>Signo de cada factor en cada intervalo:</p>${signTableHTML(a,zs)}`;
+  const div = makeItem('s2', box, html, f => {
+    const els = iv.map((_,i)=>f['s'+i]);
+    if (els.some(e=>!e.value)) return {incomplete:'Elija el signo en todos los intervalos.'};
+    const fields = els.map((e,i)=>[e, e.value===exp[i]]);
+    return {ok:fields.every(x=>x[1]), fields};
+  }, sol + '<canvas class="plot" aria-label="Gráfica del polinomio"></canvas>', d => {
+    setPlot(d.querySelector('.sol canvas'), autoPolyOpts(p, zs[0].r-1.5, zs[2].r+1.5, {points: zs.map(z=>({x:z.r,y:0,color:COL.amber,r:4}))}));
+  });
+}
+function itemFactorizar(box){
+  const j = pick([1,2]), a = pick([1,-1]); let r1, r2; do { r1 = ri0(-5,5); r2 = ri0(-5,5); } while (r1>=r2);
+  const zs = [{r:0,m:j},{r:r1,m:1},{r:r2,m:1}].sort((u,v)=>u.r-v.r);
+  const p = pfromZeros(a, zs), tri = pfromRoots(1,[r1,r2]);
+  const html = R`<p class="tag">Factorizar y hallar ceros</p><p>\(P(x)=${ptex(p)}\)</p><div class="fields"><span>Ceros:</span>${inp('z0','')}${inp('z1','')}${inp('z2','')}</div><div class="fields">${sel('c',R`En \(x=0\) la gráfica`,[['a','atraviesa el eje'],['t','toca el eje']])}</div>`;
+  const sol = R`<p>Factor común \(${aPre(a)}${powv(j)}\): \(P(x)=${aPre(a)}${powv(j)}\left(${ptex(tri)}\right)\).</p><p>Factorizamos el trinomio: \(P(x)=${aPre(a)}${factorTex(0,j)}${factorTex(r1,1)}${factorTex(r2,1)}\).</p><p>Ceros: \(${zs.map(z=>z.r).join(',\\ ')}\). El cero \(0\) tiene multiplicidad ${j}, así que en \(x=0\) la gráfica ${j===1?'atraviesa':'toca'} el eje \(x\).</p>`;
+  makeItem('s2', box, html, f => {
+    const els = [f.z0,f.z1,f.z2];
+    if (els.some(e=>!e.value.trim()) || !f.c.value) return {incomplete:'Complete los tres ceros y la opción.'};
+    const fields = matchSet(els, [0,r1,r2]); fields.push([f.c, f.c.value===(j===1?'a':'t')]);
+    return {ok:fields.every(x=>x[1]), fields};
+  }, sol);
+}
+function genS2(){
+  const box = $('#s2-items'); box.innerHTML = '';
+  itemSignos(box); itemSignos(box); itemFactorizar(box); itemFactorizar(box);
+  resetSet('s2', 4);
+}
+
+/* ============================================================
+   BLOQUE 3: máximos y mínimos relativos
+   ============================================================ */
+function itemExtremos(box){
+  const [pp,qq] = pick([[-2,0],[0,2],[-1,1],[-2,2],[-3,-1],[1,3],[-1,3],[-3,1]]);
+  const a = pick([1,-1]), d = ri(-4,4);
+  const p = [a, -1.5*a*(pp+qq), 3*a*pp*qq, d];
+  const ep = peval(p,pp), eq = peval(p,qq);
+  const max = a>0 ? [pp,ep] : [qq,eq], min = a>0 ? [qq,eq] : [pp,ep];
+  const lo = Math.min(ep,eq), hi = Math.max(ep,eq), pad = Math.max(2.5, 0.4*(hi-lo));
+  const html = R`<p class="tag">Extremos relativos</p><p>\(P(x)=${ptex(p)}\)</p><canvas class="plot" aria-label="Gráfica de un polinomio de grado 3"></canvas><div class="fields"><span>Máximo relativo:</span>${inp('mx','\\((\\)')}${inp('my',',')}<span>\()\)</span></div><div class="fields"><span>Mínimo relativo:</span>${inp('nx','\\((\\)')}${inp('ny',',')}<span>\()\)</span></div>`;
+  const sol = R`<p>La gráfica ${a>0?'crece':'decrece'} hasta \(x=${pp}\), luego ${a>0?'decrece':'crece'} hasta \(x=${qq}\) y después vuelve a ${a>0?'crecer':'decrecer'}.</p><p>Máximo relativo en \(${pt(max[0],max[1])}\) y mínimo relativo en \(${pt(min[0],min[1])}\).</p><p>Comprobación: \(P(${pp})=${ep}\) y \(P(${qq})=${eq}\).</p>`;
+  const div = makeItem('s3', box, html, f => {
+    if ([f.mx,f.my,f.nx,f.ny].some(e=>!e.value.trim())) return {incomplete:'Complete las cuatro coordenadas.'};
+    const fields = [[f.mx,near(f.mx.value,max[0])],[f.my,near(f.my.value,max[1])],[f.nx,near(f.nx.value,min[0])],[f.ny,near(f.ny.value,min[1])]];
+    return {ok:fields.every(x=>x[1]), fields};
+  }, sol);
+  const ystep = niceStep((hi-lo+2*pad)/10);
+  setPlot(div.querySelector('canvas'), {xmin:pp-2.2, xmax:qq+2.2, ymin:lo-pad, ymax:hi+pad, xstep:1, ystep: ystep<1?1:ystep, funcs:[{f:x=>peval(p,x), color:COL.violet, width:3}], points:[{x:pp,y:ep,color:COL.amber,r:4.5},{x:qq,y:eq,color:COL.amber,r:4.5}]});
+}
+function itemExtGrado(box){
+  const n = ri(3,7);
+  const sol = R`<p>Un polinomio de grado \(${n}\) tiene a lo sumo \(${n}-1=${n-1}\) extremos relativos.</p>`;
+  makeChoice('s3', box, R`<p class="tag">Cantidad de extremos</p><p>¿Cuántos extremos relativos puede tener, como máximo, un polinomio de grado \(${n}\)?</p>`,
+    shuffle([n-1,n,n+1,n-2]).map(v=>({html:R`\(${v}\)`, ok:v===n-1})), sol);
+}
+function itemExtEntreCeros(box){
+  const r1 = ri(-5,1), r2 = r1 + ri(2,4), t = r1+1, v = ri0(-9,9), up = v>0;
+  const sol = R`<p>Entre dos ceros consecutivos la gráfica sale del eje y vuelve a él. Como \(P(${t})=${v}\) es ${up?'positivo':'negativo'}, la gráfica está ${up?'sobre':'bajo'} el eje en ese tramo y debe tener al menos un ${up?'máximo':'mínimo'} relativo.</p>`;
+  makeChoice('s3', box, R`<p class="tag">Entre ceros consecutivos</p><p>\(${r1}\) y \(${r2}\) son ceros consecutivos de un polinomio \(P\), y \(P(${t})=${v}\). Entre \(x=${r1}\) y \(x=${r2}\), la gráfica tiene...</p>`,
+    [{html:'al menos un máximo relativo', ok:up},{html:'al menos un mínimo relativo', ok:!up},{html:'ningún extremo relativo', ok:false}], sol);
+}
+function genS3(){
+  const box = $('#s3-items'); box.innerHTML = '';
+  itemExtremos(box); itemExtremos(box); itemExtGrado(box); itemExtEntreCeros(box);
+  resetSet('s3', 4);
+}
+
+/* ============================================================
+   BLOQUE 4: división larga
+   ============================================================ */
+function qFields(prefix, deg){
+  let h = R`<span>\(${prefix}=\)</span>`;
+  for (let k=deg;k>=0;k--) h += `<input class="ans" data-f="${prefix[0]}${k}" aria-label="Coeficiente de grado ${k}" autocomplete="off">` + (k>0 ? R`<span>\(${powv(k)}\;+\)</span>` : '');
+  return `<div class="fields">${h}</div>`;
+}
+function itemLarga(box, quad){
+  let p, d;
+  if (!quad){ p = [pick([1,2,3,-1,-2]), ri(-6,6), ri(-6,6), ri(-6,6)]; if (Math.random()<.5) p[ri(1,2)] = 0; d = [1, -ri0(-3,3)]; }
+  else { p = [pick([1,2,-1]), ri(-5,5), ri(-5,5), ri(-5,5), ri(-5,5)]; if (Math.random()<.4) p[ri(1,3)] = 0; d = [1, ri(-3,3), ri0(-3,3)]; }
+  const L = longDiv(p,d), qd = L.q.length-1, rd = L.rem.length-1;
+  const html = R`<p class="tag">División larga${quad?' entre un divisor cuadrático':''}</p><p>Divida \(P(x)=${ptex(p)}\) entre \(D(x)=${ptex(d)}\).</p>${qFields('Q(x)',qd)}${qFields('R(x)',rd)}`;
+  const sol = galeraTable(p,d) + R`<p>\(P(x)=\left(${ptex(d)}\right)\left(${ptex(L.q)}\right)${addRem(L.rem)}\).</p>`;
+  makeItem('s4', box, html, f => {
+    const qe = [], re = [];
+    for (let k=qd;k>=0;k--) qe.push(f['Q'+k]); for (let k=rd;k>=0;k--) re.push(f['R'+k]);
+    if ([...qe,...re].some(e=>!e.value.trim())) return {incomplete:'Complete todas las casillas (use 0 si un término no aparece).'};
+    const fields = [...qe.map((e,i)=>[e, near(e.value, L.q[i])]), ...re.map((e,i)=>[e, near(e.value, L.rem[i])])];
+    return {ok:fields.every(x=>x[1]), fields};
+  }, sol);
+}
+function genS4(){
+  const box = $('#s4-items'); box.innerHTML = '';
+  itemLarga(box,false); itemLarga(box,false); itemLarga(box,true);
+  resetSet('s4', 3);
+}
+
+/* ============================================================
+   BLOQUE 5: división sintética
+   ============================================================ */
+function itemSintetica(box, deg){
+  const p = [pick([1,2,3,-1,-2])]; for (let i=0;i<deg;i++) p.push(ri(-6,6));
+  if (Math.random()<.6) p[ri(1,deg)] = 0;
+  const c = ri0(-3,3), {mid, b} = synth(p,c), n = p.length;
+  const ins = (name) => `<input class="ans" data-f="${name}" autocomplete="off" aria-label="casilla">`;
+  let t = '<div class="scroll"><table class="synth">';
+  t += '<tr>' + p.map(v=>`<td>\\(${v}\\)</td>`).join('') + `<td class="c">\\(${c}\\)</td></tr>`;
+  t += '<tr>' + mid.map((v,i)=> i===0 ? '<td></td>' : `<td>${ins('m'+i)}</td>`).join('') + '<td class="c"></td></tr>';
+  t += '<tr class="bot">' + b.map((v,i)=>`<td class="${i===n-1?'r':''}">${ins('b'+i)}</td>`).join('') + '<td></td></tr></table></div>';
+  const Q = b.slice(0,-1), Rr = b[n-1];
+  const html = R`<p class="tag">División sintética</p><p>Divida \(P(x)=${ptex(p)}\) entre \(D(x)=${xmc(c)}\).</p>${t}`;
+  const concl = R`\(Q(x)=${ptex(Q)}\), \(R=${Rr}\), así que \(P(x)=\left(${xmc(c)}\right)\left(${ptex(Q)}\right)${addRem([Rr])}\).`;
+  const sol = synthTable(p,c) + `<p>${concl}</p>`;
+  makeItem('s5', box, html, f => {
+    const els = [...mid.map((_,i)=>i?f['m'+i]:null).filter(Boolean), ...b.map((_,i)=>f['b'+i])];
+    if (els.some(e=>!e.value.trim())) return {incomplete:'Complete todas las casillas.'};
+    const fields = [...mid.slice(1).map((v,i)=>[f['m'+(i+1)], near(f['m'+(i+1)].value, v)]), ...b.map((v,i)=>[f['b'+i], near(f['b'+i].value, v)])];
+    const ok = fields.every(x=>x[1]);
+    return {ok, fields, msg: ok ? 'Correcto. ' + concl : undefined};
+  }, sol);
+}
+function genS5(){
+  const box = $('#s5-items'); box.innerHTML = '';
+  itemSintetica(box,3); itemSintetica(box,3); itemSintetica(box,4);
+  resetSet('s5', 3);
+}
+
+/* ============================================================
+   BLOQUE 6: teoremas del residuo y del factor
+   ============================================================ */
+function itemResiduo(box){
+  const p = [ri0(-3,3), ri(-5,5), ri(-5,5), ri(-6,6)], c = ri0(-3,3), v = peval(p,c);
+  const html = R`<p class="tag">Teorema del residuo</p><p>Sin dividir, encuentre el residuo de \(P(x)=${ptex(p)}\) entre \(${xmc(c)}\).</p><div class="fields">${inp('r','Residuo:')}</div>`;
+  const sol = R`<p>${c<0?R`\(${xmc(c)}=x-(${c})\), así que `:''}\(c=${c}\). Por el teorema del residuo, \(R=P(${c})\).</p><p>\(P(${c})=${substTex(p,c)}=${v}\).</p>`;
+  makeItem('s6', box, html, f => { if (!f.r.value.trim()) return {incomplete:'Escriba el residuo.'}; const o = near(f.r.value,v); return {ok:o, fields:[[f.r,o]]}; }, sol);
+}
+function itemEsFactor(box){
+  const c = ri0(-3,3); let s1, s2; do { s1 = ri0(-4,4); s2 = ri0(-4,4); } while (s1===c || s2===c);
+  const yes = Math.random()<.5, p = pfromRoots(pick([1,-1,2]), [c,s1,s2]); if (!yes) p[3] += pick([-3,-2,-1,1,2,3]);
+  const v = peval(p,c);
+  const sol = R`<p>Evaluamos en \(c=${c}\): \(P(${c})=${substTex(p,c)}=${v}\).</p><p>${v===0 ? R`Como \(P(${c})=0\), \(${xmc(c)}\) sí es factor de \(P\).` : R`Como \(P(${c})\) no es cero, \(${xmc(c)}\) no es factor de \(P\) (el residuo sería \(${v}\)).`}</p>`;
+  makeChoice('s6', box, R`<p class="tag">Teorema del factor</p><p>¿Es \(${xmc(c)}\) un factor de \(P(x)=${ptex(p)}\)?</p>`, [{html:'Sí', ok:v===0},{html:'No', ok:v!==0}], sol);
+}
+function itemHallarK(box){
+  const c = pick([1,-1,2,-2]), a = ri(-4,4), k = ri(-8,8), d = -(c*c*c + a*c*c + k*c);
+  const ptx = polyTex([[1,'x^3'],[a,'x^2']]) + ' + kx' + coefTerm(d,'',false);
+  const known = c*c*c + a*c*c + d;
+  const html = R`<p class="tag">Encontrar un coeficiente</p><p>Determine \(k\) para que \(${xmc(c)}\) sea factor de \(P(x)=${ptx}\).</p><div class="fields">${inp('k',R`\(k=\)`)}</div>`;
+  const sol = R`<p>Por el teorema del factor, \(P(${c})=0\).</p><p>\(${par(c)}^3${a===0?'':(a<0?' - ':' + ')+Math.abs(a)+R`\cdot `+par(c)+'^2'} + k\cdot ${par(c)}${coefTerm(d,'',false)}=0\Rightarrow ${known}${coefTerm(c,'k',false)}=0\Rightarrow k=${k}\).</p>`;
+  makeItem('s6', box, html, f => { if (!f.k.value.trim()) return {incomplete:'Escriba el valor de k.'}; const o = near(f.k.value,k); return {ok:o, fields:[[f.k,o]]}; }, sol);
+}
+function genS6(){
+  const box = $('#s6-items'); box.innerHTML = '';
+  itemResiduo(box); itemResiduo(box); itemEsFactor(box); itemEsFactor(box); itemHallarK(box);
+  resetSet('s6', 5);
+}
+
+/* ============================================================
+   BLOQUE 7: ceros racionales
+   ============================================================ */
+function divisors(n){ n = Math.abs(n); const r = []; for (let i=1;i<=n;i++) if (n%i===0) r.push(i); return r; }
+function candidates(lead, cst){ const out = []; divisors(cst).forEach(p => divisors(lead).forEach(q => { const f = fr(p,q); if (!out.some(g=>feq(g,f))) out.push(f); })); return out.sort((u,v)=>fval(u)-fval(v)); }
+function pmList(list, pm){ return list.map(f => (pm?R`\pm `:'') + ftex(f)).join(R`,\ `); }
+function itemCandidatos(box){
+  const r = tryGen(() => {
+    const a = pick([2,3]), d = pick([2,3,4,6,-2,-3,-4,-6]);
+    const p = [a, ri(-5,5), ri(-5,5), d];
+    const ok = pmList(candidates(a,d), true);
+    const onlyP = pmList(divisors(d).map(x=>fr(x)), true);
+    const inv = pmList(candidates(d,a), true);
+    const pos = pmList(candidates(a,d), false);
+    const m = mc(ok, [onlyP, inv, pos]); if (!m) return null;
+    return {p, a, d, m};
+  });
+  const {p, a, d, m} = r;
+  const sol = R`<p>Divisores de \(${d}\) (valores de \(p\)): \(${divisors(d).join(',\\ ')}\). Divisores de \(${a}\) (valores de \(q\)): \(${divisors(a).join(',\\ ')}\).</p><p>Candidatos \(\pm\dfrac{p}{q}\): \(${pmList(candidates(a,d),true)}\).</p>`;
+  makeChoice('s7', box, R`<p class="tag">Posibles ceros racionales</p><p>¿Cuál es la lista de posibles ceros racionales de \(P(x)=${ptex(p)}\)?</p>`, m.opts.map((s,i)=>({html:R`\(${s}\)`, ok:i===m.ans})), sol);
+}
+function intOrder(cands){ const ints = cands.filter(f=>f.d===1).map(f=>f.n); const out = []; ints.forEach(v => { out.push(v, -v); }); return out; }
+function rootSearch(p){
+  const tried = []; for (const c of intOrder(candidates(p[0], p[p.length-1]))){ const v = peval(p,c); tried.push(R`P(${c})=${v}`); if (v===0) return {c, tried}; }
+  return null;
+}
+function itemCerosRac(box, monic){
+  let p, zeros, quadTex;
+  if (monic){
+    const roots = shuffle([-4,-3,-2,-1,1,2,3,4]).slice(0,3); p = pfromRoots(1, roots); zeros = roots.map(x=>fr(x));
+  } else {
+    const s = pick([1,-1,3,-3]); let r1, r2; do { r1 = ri0(-3,3); r2 = ri0(-3,3); } while (r1===r2);
+    p = pmul([2,-s], pfromRoots(1,[r1,r2])); zeros = [fr(s,2), fr(r1), fr(r2)];
+  }
+  const found = rootSearch(p), c = found.c, Q = synth(p,c).b.slice(0,-1);
+  const rest = zeros.slice(); rest.splice(rest.findIndex(z=>feq(z,fr(c))),1);
+  if (monic) quadTex = rest.map(z=>factorTex(z.n,1)).join('');
+  else { const nz = rest.find(z=>z.d===2), iz = rest.find(z=>z.d===1); quadTex = R`\left(${polyTex([[2,'x'],[-nz.n,'']])}\right)${factorTex(iz.n,1)}`; }
+  const lead = p[0], cst = p[p.length-1];
+  const html = R`<p class="tag">${monic?'Ceros racionales':'Ceros racionales con coeficiente principal 2'}</p><p>Encuentre todos los ceros racionales de \(P(x)=${ptex(p)}\).</p><div class="fields"><span>Ceros:</span>${inp('z0','')}${inp('z1','')}${inp('z2','')}</div>`;
+  const sorted = zeros.slice().sort((u,v)=>fval(u)-fval(v));
+  const sol = R`<p>Candidatos \(\pm\dfrac{p}{q}\) con \(p\) divisor de \(${cst}\) y \(q\) divisor de \(${lead}\): \(${pmList(candidates(lead,cst),true)}\).</p>
+    <p>Probamos${monic?'':' primero los enteros'}: \(${found.tried.join(R`,\ `)}\). Entonces \(${c}\) es cero.</p>
+    ${synthTable(p,c)}
+    <p>\(P(x)=${factorTex(c,1)}\left(${ptex(Q)}\right)=${factorTex(c,1)}${quadTex}\).</p>
+    <p>Ceros racionales: \(${sorted.map(ftex).join(',\\ ')}\).</p>`;
+  makeItem('s7', box, html, f => {
+    const els = [f.z0,f.z1,f.z2];
+    if (els.some(e=>!e.value.trim())) return {incomplete:'Escriba los tres ceros.'};
+    const fields = matchSet(els, zeros); return {ok:fields.every(x=>x[1]), fields};
+  }, sol);
+}
+function genS7(){
+  const box = $('#s7-items'); box.innerHTML = '';
+  itemCandidatos(box); itemCerosRac(box,true); itemCerosRac(box,true); itemCerosRac(box,false);
+  resetSet('s7', 4);
+}
+
+/* ============================================================
+   RETO RELÁMPAGO
+   ============================================================ */
+const RETO = [
+  () => { const zs = genZeros(3,[1,2,3]), z = pick(zs);
+    return {q:R`¿Qué multiplicidad tiene el cero \(x=${z.r}\) en \(P(x)=${factTex(pick([1,-1,2]),zs)}\)?`, opts:['1','2','3','4'], ans:z.m-1}; },
+  () => { const zs = genZeros(3,[1,2,3]), z = pick(zs);
+    return {q:R`En \(P(x)=${factTex(pick([1,-1]),zs)}\), ¿qué hace la gráfica en \(x=${z.r}\)?`, opts:['Atraviesa el eje x','Toca el eje x y se devuelve'], ans:z.m%2 ? 0 : 1}; },
+  () => tryGen(() => { const p = [ri0(-2,2), ri(-4,4), ri(-4,4), ri(-5,5)], c = ri0(-2,2);
+    const m = mc(String(peval(p,c)), [String(peval(p,-c)), String(-peval(p,c)), String(p[3])]); if (!m) return null;
+    return {q:R`¿Cuál es el residuo de dividir \(P(x)=${ptex(p)}\) entre \(${xmc(c)}\)?`, opts:m.opts.map(s=>R`\(${s}\)`), ans:m.ans}; }),
+  () => tryGen(() => { const roots = shuffle([-3,-2,-1,1,2,3]).slice(0,3), p = pfromRoots(1,roots), r = pick(roots);
+    const non = shuffle([-4,-3,-2,-1,1,2,3,4].filter(t=>!roots.includes(t))).slice(0,3);
+    const m = mc(xmc(r), non.map(xmc)); if (!m) return null;
+    return {q:R`¿Cuál de estos es un factor de \(P(x)=${ptex(p)}\)?`, opts:m.opts.map(s=>R`\(${s}\)`), ans:m.ans}; }),
+  () => { const d = pick([3,5,-3,-5]), p = [2, ri(-4,4), ri(-4,4), d], C = candidates(2,d);
+    const outside = shuffle([fr(2),fr(-2),fr(1,3),fr(4),fr(-1,3)].filter(f=>!C.some(g=>feq(g,fr(Math.abs(f.n),f.d)))))[0];
+    const ins = shuffle(C.flatMap(f=>[f,fneg(f)])).slice(0,3);
+    const m = mc(ftex(outside), ins.map(ftex));
+    return {q:R`¿Cuál <b>no</b> puede ser un cero racional de \(P(x)=${ptex(p)}\)?`, opts:m.opts.map(s=>R`\(${s}\)`), ans:m.ans}; },
+  () => { const n = ri(3,7); const o = shuffle([n-1,n,n+1,n-2]);
+    return {q:R`¿Cuántos extremos relativos puede tener, como máximo, un polinomio de grado \(${n}\)?`, opts:o.map(v=>R`\(${v}\)`), ans:o.indexOf(n-1)}; },
+  () => { const zs = genZeros(3,[1,1,2]), a = pick([1,-1]), iv = IVL(zs), j = ri(0,3), p = pfromZeros(a,zs);
+    return {q:R`¿Qué signo tiene \(P(x)=${factTex(a,zs)}\) en \(${iv[j].tex}\)?`, opts:['Positivo','Negativo'], ans:peval(p,iv[j].t)>0 ? 0 : 1}; },
+  () => tryGen(() => { const p = [pick([1,2,-1]), ri(-4,4), ri(-4,4), ri(-5,5)], c = ri0(-3,3);
+    const Q = s => ptex(synth(p,s).b.slice(0,-1));
+    const m = mc(Q(c), [Q(-c), ptex(p.slice(0,-1)), ptex([p[0], p[1]+c, p[2]+c])]); if (!m) return null;
+    return {q:R`Al dividir \(P(x)=${ptex(p)}\) entre \(${xmc(c)}\), ¿cuál es el cociente?`, opts:m.opts.map(s=>R`\(${s}\)`), ans:m.ans}; })
+];
+
+/* ============================================================
+   AGENDA, PORTADA Y ARRANQUE
+   ============================================================ */
+const AGENDA = [
+  {id:'inicio', t:'Inicio', min:5}, {id:'s1', t:'Ceros', min:15}, {id:'s2', t:'Signo y gráfica', min:15},
+  {id:'s3', t:'Extremos', min:10}, {id:'s4', t:'División larga', min:15}, {id:'pausa', t:'Pausa', min:5},
+  {id:'s5', t:'Sintética', min:15}, {id:'s6', t:'Residuo y factor', min:15}, {id:'s7', t:'Ceros racionales', min:20},
+  {id:'reto', t:'Reto', min:5}
+];
+const TOTAL = AGENDA.reduce((a,b)=>a+b.min,0)*60;
+function mc(correct, ds){ const all = [correct, ...ds]; if (new Set(all).size < all.length) return null; const order = shuffle(all.map((s,i)=>({s,ok:i===0}))); return {opts:order.map(o=>o.s), ans:order.findIndex(o=>o.ok)}; }
+function tryGen(fn){ for (let i=0;i<50;i++){ const r = fn(); if (r) return r; } return null; }
+const SHAPES = ['▲','◆','●','■'];
+let reto = null;
+function retoStart(){
+  reto = {qs: shuffle(RETO).map(g => g()), i:0, pts:0, timer:null};
+  resetSet('reto', 8);
+  retoShow();
+}
+function retoShow(){
+  const Q = reto.qs[reto.i], area = $('#retoArea');
+  area.innerHTML = `<div class="rq-head"><span>Pregunta ${reto.i+1} de ${reto.qs.length}</span><span>Aciertos: ${reto.pts}</span></div><div class="rq">${Q.q}</div><div class="rbar"><div id="rbarIn"></div></div><div class="tiles">${Q.opts.map((o,j)=>`<button class="tile t${j}" data-j="${j}"><span class="shape" aria-hidden="true">${SHAPES[j]}</span><span>${o}</span></button>`).join('')}</div><div class="rfoot" id="rfoot"></div>`;
+  renderMath(area);
+  area.querySelectorAll('.tile').forEach(b => b.addEventListener('click', () => retoAnswer(+b.dataset.j)));
+  const T = 20000, t0 = performance.now(), bar = $('#rbarIn');
+  clearInterval(reto.timer);
+  reto.timer = setInterval(() => {
+    const left = Math.max(0, 1-(performance.now()-t0)/T);
+    bar.style.width = (left*100)+'%';
+    if (left<=0) retoAnswer(-1);
+  }, 100);
+}
+function retoAnswer(j){
+  clearInterval(reto.timer);
+  const Q = reto.qs[reto.i], area = $('#retoArea');
+  const tiles = area.querySelectorAll('.tile');
+  if (tiles[0].disabled) return;
+  const ok = j===Q.ans; if (ok) reto.pts++;
+  score.reto.totTries++; if (ok){ score.reto.ok++; score.reto.totOk++; }
+  tiles.forEach((t,k) => { t.disabled = true; if (k===Q.ans) t.classList.add('right'); else t.classList.add('dim'); });
+  const last = reto.i === reto.qs.length-1;
+  const foot = $('#rfoot');
+  foot.innerHTML = `<span class="fb ${ok?'ok':'bad'}">${j<0?'Se acabó el tiempo.':ok?'Correcto.':'Incorrecto.'}</span><button class="btn" id="rnext">${last?'Ver puntaje':'Siguiente pregunta'}</button>`;
+  $('#rnext').addEventListener('click', () => { if (last) retoEnd(); else { reto.i++; retoShow(); } });
+  $('#rnext').focus();
+  score.reto.best = Math.max(score.reto.best, score.reto.ok/8); updateScore('reto');
+}
+function retoEnd(){
+  const n = reto.qs.length, p = reto.pts;
+  const msg = p===n ? 'Ronda perfecta.' : p>=6 ? 'Muy buen dominio del tema.' : p>=4 ? 'Buen avance. Repase los bloques donde hubo dudas.' : 'Conviene repasar los ejemplos resueltos antes de otra ronda.';
+  $('#retoArea').innerHTML = `<div class="retoscore">${p} de ${n}</div><p>${msg}</p><button class="btn" id="retoAgain">Jugar otra ronda</button>`;
+  $('#retoAgain').addEventListener('click', retoStart);
+}
+
+/* ============================================================
+   RESULTADOS
+   ============================================================ */
+function showResults(){
+  let tOk = 0, tTr = 0;
+  const rows = SECTIONS.map(s => { const S = score[s.id]; tOk += S.totOk; tTr += S.totTries;
+    const pct = Math.round(S.best*100);
+    return `<tr><td>${s.name}</td><td>${S.totOk}</td><td>${S.totTries}</td><td><div class="bar"><div style="width:${pct}%"></div></div></td><td>${pct} %</td></tr>`; }).join('');
+  const prec = tTr ? Math.round(tOk/tTr*100) : 0;
+  $('#resArea').innerHTML = `<div class="scroll"><table class="res"><tr><th>Bloque</th><th>Aciertos</th><th>Intentos</th><th>Avance</th><th></th></tr>${rows}<tr><th>Total</th><th>${tOk}</th><th>${tTr}</th><th colspan="2">Precisión: ${prec} %</th></tr></table></div><p class="help">Los aciertos e intentos se acumulan aunque se generen preguntas nuevas. El avance registra el mejor resultado alcanzado en cada bloque.</p>`;
+}
+
+let elapsed = 0, running = false, tick = null, last = 0;
+function mmss(s){ s = Math.floor(s); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function buildTape(){
+  const tape = $('#tape'); let acc = 0;
+  AGENDA.forEach(b => {
+    const btn = document.createElement('button'); btn.className = 'seg' + (b.id==='pausa'?' break':''); btn.style.flexGrow = b.min; btn.dataset.id = b.id;
+    btn.innerHTML = `<b>${b.t}</b>${mmss(acc*60)} a ${mmss((acc+b.min)*60)}`;
+    btn.addEventListener('click', () => openBlock(b.id));
+    tape.appendChild(btn); acc += b.min;
+  });
+}
+function openBlock(id){
+  const el = document.getElementById(id); if (!el) return;
+  if (el.tagName==='DETAILS') el.open = true;
+  el.scrollIntoView({block:'start'});
+}
+function renderTimer(){
+  $('#clock').innerHTML = `${mmss(elapsed)} <small>de ${mmss(TOTAL)}</small>`;
+  $('#playhead').style.left = `calc(${Math.min(1,elapsed/TOTAL)*100}% - 1.5px)`;
+  let acc = 0, cur = AGENDA[AGENDA.length-1];
+  for (const b of AGENDA){ if (elapsed < (acc+b.min)*60){ cur = b; break; } acc += b.min; }
+  let a2 = 0;
+  document.querySelectorAll('.seg').forEach((s,i) => { const b = AGENDA[i]; s.classList.toggle('now', b===cur); s.classList.toggle('done', elapsed >= (a2+b.min)*60); a2 += b.min; });
+  const nb = $('#nowblock'); nb.innerHTML = elapsed>=TOTAL ? 'Tiempo de la clase <b>cumplido</b>' : `Bloque actual: <b>${cur.t}</b>`;
+}
+function timerToggle(){
+  running = !running;
+  const b = $('#tgo');
+  if (running){ last = Date.now(); tick = setInterval(() => { const now = Date.now(); elapsed += (now-last)/1000; last = now; renderTimer(); }, 500); b.textContent = 'Pausar'; }
+  else { clearInterval(tick); b.textContent = 'Continuar'; }
+}
+function timerReset(){ clearInterval(tick); running = false; elapsed = 0; $('#tgo').textContent = 'Iniciar clase'; renderTimer(); }
+
+let pLeft = 300, pRun = false, pTick = null;
+function pauseRender(){ $('#pclock').textContent = mmss(pLeft); }
+function pauseToggle(){
+  pRun = !pRun; const b = $('#pgo');
+  if (pRun){ let lastP = Date.now(); pTick = setInterval(() => { const now = Date.now(); pLeft = Math.max(0, pLeft-(now-lastP)/1000); lastP = now; pauseRender(); if (pLeft<=0){ clearInterval(pTick); pRun = false; b.textContent = 'Pausa terminada'; b.disabled = true; } }, 250); b.textContent = 'Detener'; }
+  else { clearInterval(pTick); b.textContent = 'Continuar pausa'; }
+}
+function pauseReset(){ clearInterval(pTick); pRun = false; pLeft = 300; const b = $('#pgo'); b.disabled = false; b.textContent = 'Iniciar pausa'; pauseRender(); }
+
+function initSteppers(){
+  document.querySelectorAll('.worked').forEach(w => {
+    const st = [...w.querySelectorAll('.step')]; let i = 0;
+    const nx = w.querySelector('.next'), rs = w.querySelector('.reset'), ct = w.querySelector('.count');
+    const upd = () => { st.forEach((s,j) => s.hidden = j>=i); ct.textContent = `Paso ${i} de ${st.length}`; nx.disabled = i>=st.length; };
+    nx.addEventListener('click', () => { i++; upd(); }); rs.addEventListener('click', () => { i=0; upd(); }); upd();
+  });
+}
+
+function hero(){
+  const cv = $('#herocv');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const f = x => 0.045*(x-2)*(x-6)*(x-6)*(x-11);
+  const base = {xmin:-6,xmax:13,ymin:-6,ymax:7,xstep:1,ystep:1,noLabels:true};
+  const pts = [{x:2,y:0,color:COL.green,r:5},{x:6,y:0,color:COL.amber,r:6},{x:11,y:0,color:COL.green,r:5}];
+  const fs = p => [{f, color:COL.violet, width:3.4, dom:[-6,-6+19*p]}];
+  const final = () => setPlot(cv, {...base, funcs:fs(1), points:pts});
+  if (reduce || !cv.getContext){ final(); return; }
+  const t0 = performance.now(), D = 1600;
+  const step = now => { const p = Math.min(1,(now-t0)/D), e = 1-Math.pow(1-p,3);
+    cv._opt = {...base, funcs:fs(e)}; plot(cv, cv._opt);
+    if (p<1) requestAnimationFrame(step); else final(); };
+  requestAnimationFrame(step);
+}
+const GENS = {s1:genS1, s2:genS2, s3:genS3, s4:genS4, s5:genS5, s6:genS6, s7:genS7};
+function init(){
+  buildTape(); renderTimer(); pauseRender();
+  $('#tgo').addEventListener('click', timerToggle);
+  $('#treset').addEventListener('click', timerReset);
+  $('#tbig').addEventListener('click', e => { const on = document.documentElement.classList.toggle('big'); e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Texto normal' : 'Texto grande'; });
+  $('#pgo').addEventListener('click', pauseToggle);
+  $('#preset').addEventListener('click', pauseReset);
+  $('#retoGo').addEventListener('click', retoStart);
+  $('#resGo').addEventListener('click', showResults);
+  document.querySelectorAll('[data-regen]').forEach(b => b.addEventListener('click', () => GENS[b.dataset.regen]()));
+  $('#resultados').addEventListener('toggle', e => { if (e.target.open) showResults(); });
+  longWorked($('#wkLong'), [-1,0,4,2], [1,3]);
+  synthWorked($('#wkSynth'), [2,-3,-2,0], 3);
+  $('#wk7synth').innerHTML = synthTable([1,-6,5,12], 3);
+  Object.values(GENS).forEach(g => g());
+  initEx1(); initSteppers();
+  setPlot($('#wk1cv'), autoPolyOpts([1,-3,2,0,0], -1.2, 2.8, {points:[{x:0,y:0,color:COL.amber,r:4.5},{x:1,y:0,color:COL.amber,r:4.5},{x:2,y:0,color:COL.amber,r:4.5}]}));
+  setPlot($('#wk2cv'), autoPolyOpts([-1,-2,8,0], -5.5, 3.5, {points:[{x:-4,y:0,color:COL.amber,r:4.5},{x:0,y:0,color:COL.amber,r:4.5},{x:2,y:0,color:COL.amber,r:4.5}]}));
+  renderMath(document.body);
+  hero();
+}
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
